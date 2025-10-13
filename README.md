@@ -1,2 +1,2 @@
 # 2025-b-Palma_Stuart-sw-gr3
-Hola soy stu
+Hola mi nombre es Stuart Palma

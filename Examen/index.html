@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartero del Vecindario - Examen Babylon.js</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        /* UI del juego */
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        #interaction-prompt {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background-color: rgba(0, 100, 200, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+        }
+
+        #game-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 200;
+        }
+
+        #game-title h1 {
+            margin: 0 0 15px 0;
+            font-size: 36px;
+        }
+
+        #game-title p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        #start-button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #start-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+    <!-- Babylon.js desde CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+<body>
+    <!-- Canvas para renderizado 3D -->
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Pantalla de título -->
+    <div id="game-title">
+        <h1>Cartero del Vecindario</h1>
+        <p>Controles:</p>
+        <p><strong>WASD</strong> - Movimiento</p>
+        <p><strong>Mouse</strong> - Mirar</p>
+        <p><strong>E</strong> - Recoger/Entregar carta</p>
+        <p style="margin-top: 15px;">Recoge la carta en la oficina de correos y entrégala en el buzón</p>
+        <button id="start-button">Comenzar Juego</button>
+    </div>
+
+    <!-- UI superpuesta -->
+    <div id="ui-overlay">
+        <div><strong>Cartero del Vecindario</strong></div>
+        <div id="status">Estado: Busca la carta en la oficina</div>
+        <div id="target">Casa destino: #1</div>
+        <div id="deliveries">Entregas: 0</div>
+    </div>
+
+    <!-- Prompt de interacción -->
+    <div id="interaction-prompt"></div>
+
+    <!-- Módulo principal del juego (ES6 modules) -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -17,13 +17,20 @@ export let houses = [];
 export let deliveryZones = [];
 export let currentTargetHouse = 0;
 
-// Referencias de UI
-export const statusDiv = document.getElementById("status");
-export const targetDiv = document.getElementById("target");
-export const deliveriesDiv = document.getElementById("deliveries");
+// Referencias de UI (HUD minimalista)
+export const statusDiv = document.getElementById("status-text");
+export const targetDiv = document.getElementById("target-house");
+export const deliveriesDiv = document.getElementById("delivery-count");
 export const interactionPrompt = document.getElementById("interaction-prompt");
 export const gameTitle = document.getElementById("game-title");
 export const startButton = document.getElementById("start-button");
+export const statusIndicator = document.querySelector(".status-dot");
+export const crosshair = document.getElementById("crosshair");
+export const compassArrow = document.getElementById("compass-arrow");
+
+// Posiciones de las casas para la brújula (se llenan en objects.js)
+export let housePositions = [];
+export function addHousePosition(pos) { housePositions.push(pos); }
 
 // Funciones para modificar las variables
 export function setScene(s) { scene = s; }

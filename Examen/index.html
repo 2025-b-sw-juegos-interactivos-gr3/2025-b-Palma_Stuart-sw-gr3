@@ -3,87 +3,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartero del Vecindario - Examen Babylon.js</title>
+    <title>Cartero del Vecindario</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- Google Fonts - Tipografía legible -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
+        :root {
+            /* Paleta cálida/urbana coherente */
+            --color-primary: #E85D04;      /* Naranja cálido */
+            --color-secondary: #F48C06;    /* Naranja claro */
+            --color-accent: #FAA307;       /* Amarillo dorado */
+            --color-success: #52B788;      /* Verde suave */
+            --color-bg-dark: #1A1A1D;      /* Fondo oscuro */
+            --color-bg-card: rgba(26, 26, 29, 0.92);
+            --color-text: #FEFAE0;         /* Texto crema */
+            --color-text-muted: rgba(254, 250, 224, 0.6);
+            --color-border: rgba(254, 250, 224, 0.1);
+
+            /* Tipografía */
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            font-family: var(--font-main);
+            background: var(--color-bg-dark);
+            color: var(--color-text);
         }
 
         #renderCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            display: block;
             touch-action: none;
+            z-index: 0;
         }
 
-        /* UI del juego */
-        #ui-overlay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 100;
+        /* ========== FADE OVERLAY (Transiciones) ========== */
+        #fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--color-bg-dark);
+            z-index: 150; /* Debajo de la pantalla de título pero arriba del canvas */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease-out;
         }
 
-        #interaction-prompt {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            background-color: rgba(0, 100, 200, 0.8);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
+        #fade-overlay.fade-in {
+            opacity: 1;
+        }
+
+        #fade-overlay.fade-out {
+            opacity: 0;
+        }
+
+        /* ========== HUD MINIMALISTA ========== */
+        #hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 24px;
             display: none;
+            justify-content: space-between;
+            align-items: flex-start;
             z-index: 100;
+            pointer-events: none;
         }
 
-        #game-title {
+        #hud > * {
+            pointer-events: auto;
+        }
+
+        /* Panel izquierdo - Info esencial */
+        .hud-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hud-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--color-bg-card);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--color-accent);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        .status-dot.has-letter {
+            background: var(--color-success);
+            animation: none;
+        }
+
+        #status-text {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Panel central - Brújula */
+        .hud-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #compass {
+            width: 70px;
+            height: 70px;
+            background: var(--color-bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        #compass-arrow {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 28px solid var(--color-primary);
+            filter: drop-shadow(0 0 4px var(--color-primary));
+            transition: transform 0.15s ease-out;
+        }
+
+        #compass-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #target-house {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        /* Panel derecho - Contador */
+        .hud-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .delivery-counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--color-bg-card);
+            padding: 10px 18px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .counter-icon {
+            font-size: 22px;
+        }
+
+        #delivery-count {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--color-primary);
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Botón Mute */
+        #mute-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        #mute-btn:hover {
+            background: rgba(232, 93, 4, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* ========== CROSSHAIR INTERACTIVO ========== */
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            pointer-events: none;
+            transition: all 0.15s ease;
+        }
+
+        #crosshair .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--color-text);
+            border-radius: 50%;
+            opacity: 0.8;
+            transition: all 0.15s ease;
+        }
+
+        #crosshair.interactive .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--color-primary);
+            opacity: 1;
+            box-shadow: 0 0 12px var(--color-primary);
+        }
+
+        #crosshair .ring {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            transition: all 0.15s ease;
+        }
+
+        #crosshair.interactive .ring {
+            border-color: var(--color-primary);
+            width: 28px;
+            height: 28px;
+        }
+
+        /* ========== PROMPT DE INTERACCIÓN ========== */
+        #interaction-prompt {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--color-bg-card);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+            opacity: 0;
+            transition: all 0.25s ease;
+        }
+
+        #interaction-prompt.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #interaction-prompt .key {
+            display: inline-block;
+            background: var(--color-primary);
             color: white;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin: 0 4px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        #interaction-prompt .icon {
+            margin-right: 8px;
+        }
+
+        /* ========== PANTALLA DE TÍTULO ========== */
+        #game-title {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(26, 26, 29, 0.85);
+            backdrop-filter: blur(8px);
             z-index: 200;
         }
 
-        #game-title h1 {
-            margin: 0 0 15px 0;
-            font-size: 36px;
+        .title-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 48px 56px;
+            text-align: center;
+            max-width: 460px;
+            backdrop-filter: blur(20px);
         }
 
-        #game-title p {
-            margin: 5px 0;
-            font-size: 16px;
+        #game-title h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--color-text);
+        }
+
+        #game-title h1 span {
+            color: var(--color-primary);
+        }
+
+        #game-title .subtitle {
+            color: var(--color-text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+
+        .controls-list {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-key {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .control-desc {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .objective {
+            color: var(--color-text-muted);
+            font-size: 14px;
+            line-height: 1.7;
+            margin: 24px 0;
+            padding: 16px;
+            background: rgba(232, 93, 4, 0.08);
+            border-radius: 8px;
+            border-left: 3px solid var(--color-primary);
+            text-align: left;
         }
 
         #start-button {
-            margin-top: 20px;
-            padding: 12px 30px;
-            font-size: 18px;
-            background-color: #4CAF50;
+            margin-top: 16px;
+            padding: 16px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font-main);
+            background: var(--color-primary);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         #start-button:hover {
-            background-color: #45a049;
+            background: var(--color-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(232, 93, 4, 0.3);
+        }
+
+        #start-button:active {
+            transform: translateY(0);
+        }
+
+        /* ========== ANIMACIONES ========== */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes bounce-counter {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.25); }
+            60% { transform: scale(0.95); }
+        }
+
+        @keyframes slide-down {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hud-left, .hud-center, .hud-right {
+            animation: slide-down 0.4s ease forwards;
+        }
+
+        .hud-center { animation-delay: 0.1s; }
+        .hud-right { animation-delay: 0.2s; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .title-card {
+                padding: 32px 24px;
+                margin: 16px;
+            }
+
+            #game-title h1 {
+                font-size: 28px;
+            }
+
+            .controls-list {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            #compass {
+                width: 56px;
+                height: 56px;
+            }
+
+            #compass-arrow {
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-bottom: 22px solid var(--color-primary);
+            }
         }
     </style>
 
@@ -95,29 +479,91 @@
     <!-- Canvas para renderizado 3D -->
     <canvas id="renderCanvas"></canvas>
 
-    <!-- Pantalla de título -->
-    <div id="game-title">
-        <h1>Cartero del Vecindario</h1>
-        <p>Controles:</p>
-        <p><strong>WASD</strong> - Movimiento</p>
-        <p><strong>Mouse</strong> - Mirar</p>
-        <p><strong>E</strong> - Recoger/Entregar carta</p>
-        <p style="margin-top: 15px;">Recoge la carta en la oficina de correos y entrégala en el buzón</p>
-        <button id="start-button">Comenzar Juego</button>
+    <!-- Fade overlay para transiciones (inicialmente oculto) -->
+    <div id="fade-overlay"></div>
+
+    <!-- Crosshair interactivo -->
+    <div id="crosshair">
+        <div class="dot"></div>
+        <div class="ring"></div>
     </div>
 
-    <!-- UI superpuesta -->
-    <div id="ui-overlay">
-        <div><strong>Cartero del Vecindario</strong></div>
-        <div id="status">Estado: Busca la carta en la oficina</div>
-        <div id="target">Casa destino: #1</div>
-        <div id="deliveries">Entregas: 0</div>
+    <!-- Pantalla de título -->
+    <div id="game-title">
+        <div class="title-card">
+            <h1>Cartero del <span>Vecindario</span></h1>
+            <p class="subtitle">Vertical Slice</p>
+
+            <div class="controls-list">
+                <div class="control-item">
+                    <span class="control-key">WASD</span>
+                    <span class="control-desc">Mover</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">Mouse</span>
+                    <span class="control-desc">Mirar</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">E</span>
+                    <span class="control-desc">Interactuar</span>
+                </div>
+            </div>
+
+            <div class="objective">
+                <strong>Objetivo:</strong> Recoge la carta en la oficina postal (zona azul) y entrégala en el buzón de la casa indicada por la brújula.
+            </div>
+
+            <button id="start-button">Jugar</button>
+        </div>
+    </div>
+
+    <!-- HUD minimalista -->
+    <div id="hud">
+        <!-- Izquierda: Estado -->
+        <div class="hud-left">
+            <div class="hud-status">
+                <span class="status-dot"></span>
+                <span id="status-text">Busca la carta en la oficina</span>
+            </div>
+        </div>
+
+        <!-- Centro: Brújula -->
+        <div class="hud-center">
+            <div id="compass">
+                <div id="compass-arrow"></div>
+            </div>
+            <span id="compass-label">Destino</span>
+            <span id="target-house">Casa #1</span>
+        </div>
+
+        <!-- Derecha: Contador y Mute -->
+        <div class="hud-right">
+            <div class="delivery-counter">
+                <span class="counter-icon">📬</span>
+                <span id="delivery-count">0</span>
+            </div>
+            <button id="mute-btn" title="Silenciar">🔊</button>
+        </div>
     </div>
 
     <!-- Prompt de interacción -->
-    <div id="interaction-prompt"></div>
+    <div id="interaction-prompt">
+        <span class="icon">📧</span>
+        Presiona <span class="key">E</span> para recoger
+    </div>
 
-    <!-- Módulo principal del juego (ES6 modules) -->
+    <!-- Módulo principal del juego -->
     <script type="module" src="js/main.js"></script>
+
+    <!-- Script para UI -->
+    <script>
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('hud').style.display = 'flex';
+            // Fade out del overlay
+            setTimeout(() => {
+                document.getElementById('fade-overlay').classList.add('fade-out');
+            }, 100);
+        });
+    </script>
 </body>
 </html>

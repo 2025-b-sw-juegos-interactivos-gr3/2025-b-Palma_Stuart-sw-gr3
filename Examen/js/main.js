@@ -10,7 +10,9 @@ import { createLetter, createNeighborhoodHouses } from './objects.js';
 import { createDecorations, createKenneyAssets } from './decorations.js';
 import { createPlayer } from './player.js';
 import { setupKeyboardControls } from './controls.js';
-import { checkProximity } from './interactions.js';
+import { checkProximity, updateCompass } from './interactions.js';
+import { audioManager } from './audio.js';
+import { setupPostProcessing } from './effects.js';
 
 // Canvas y motor Babylon.js
 const canvas = document.getElementById("renderCanvas");
@@ -34,6 +36,11 @@ function createScene() {
     return scene;
 }
 
+// Inicializa efectos de post-procesamiento después de crear la escena
+function initPostProcessing(scene, camera) {
+    setupPostProcessing(scene, camera);
+}
+
 // Inicialización del juego
 const gameScene = createScene();
 setScene(gameScene);
@@ -43,16 +50,44 @@ setupKeyboardControls(gameScene);
 startButton.addEventListener("click", () => {
     setGameStarted(true);
     gameTitle.style.display = "none";
-    targetDiv.textContent = "Casa destino: #" + (currentTargetHouse + 1);
+    targetDiv.textContent = "Casa #" + (currentTargetHouse + 1);
+
+    // Inicializar audio (requiere interacción del usuario)
+    audioManager.init();
+    audioManager.startAmbient();
+
+    // Inicializar post-procesamiento
+    initPostProcessing(gameScene, camera);
+
+    // Bloquear puntero para mejor control FPS
+    canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+    canvas.requestPointerLock();
+
     canvas.focus();
 });
 
+// Botón de mute
+const muteBtn = document.getElementById('mute-btn');
+if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+        const isMuted = audioManager.toggleMute();
+        muteBtn.textContent = isMuted ? '🔇' : '🔊';
+        muteBtn.title = isMuted ? 'Activar sonido' : 'Silenciar';
+    });
+}
+
 // Loop de renderizado principal
 engine.runRenderLoop(function() {
-    if (scene && gameStarted) {
+    // Siempre renderizar la escena
+    if (gameScene) {
+        gameScene.render();
+    }
+
+    // Lógica del juego solo cuando está activo
+    if (gameStarted && player && camera) {
         player.position = camera.position.clone();
         checkProximity();
-        scene.render();
+        updateCompass();
     }
 });
 

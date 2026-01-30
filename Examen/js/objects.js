@@ -2,7 +2,7 @@
 // OBJETOS DEL JUEGO (CARTA Y CASAS)
 // ============================================
 
-import { setLetter, setMailbox, setCurrentTargetHouse, addHouse, addDeliveryZone, playerHasLetter } from './config.js';
+import { setLetter, setMailbox, setCurrentTargetHouse, addHouse, addDeliveryZone, playerHasLetter, addHousePosition } from './config.js';
 
 // Crea la carta dentro de la oficina
 export function createLetter(scene) {
@@ -139,7 +139,7 @@ export function createNeighborhoodHouses(scene) {
     ];
 
     // Casas west (mirando Este) y east (mirando Oeste) alineadas con ramales
-    const housePositions = [
+    const houseConfigs = [
         { id: 1, x: -12, z: -10, building: buildingTypes[0], rotation: 0 },
         { id: 2, x: -12, z: 0,   building: buildingTypes[1], rotation: 0 },
         { id: 3, x: -12, z: 10,  building: buildingTypes[2], rotation: 0 },
@@ -147,12 +147,67 @@ export function createNeighborhoodHouses(scene) {
         { id: 5, x: 12,  z: 10,  building: buildingTypes[4], rotation: Math.PI }
     ];
 
-    housePositions.forEach(pos => {
+    houseConfigs.forEach(pos => {
         const houseData = createHouse(pos.id, pos.x, pos.z, scene, pos.building, pos.rotation);
         addHouse(houseData.house);
         addDeliveryZone(houseData.deliveryZone);
+
+        // Guardar posición para la brújula (posición del buzón/zona de entrega)
+        const forward = new BABYLON.Vector3(Math.sin(pos.rotation || 0), 0, Math.cos(pos.rotation || 0));
+        const targetPos = new BABYLON.Vector3(
+            pos.x + forward.x * 3,
+            1,
+            pos.z + forward.z * 3
+        );
+        addHousePosition(targetPos);
+
+        // Crear número 3D visible sobre la casa
+        createHouseNumber(scene, pos.id, pos.x, pos.z, pos.rotation);
     });
 
     setCurrentTargetHouse(0);
-    setMailbox(housePositions.length > 0 ? scene.getMeshByName("deliveryZone1") : null);
+    setMailbox(houseConfigs.length > 0 ? scene.getMeshByName("deliveryZone1") : null);
+}
+
+// Crea número 3D flotante sobre cada casa
+function createHouseNumber(scene, id, x, z, rotation) {
+    // Texto dinámico para el número
+    const dynamicTexture = new BABYLON.DynamicTexture("houseNumberTex" + id, { width: 128, height: 128 }, scene);
+    const ctx = dynamicTexture.getContext();
+
+    // Dibujar número con fondo
+    ctx.fillStyle = "#E85D04"; // Color primario
+    ctx.beginPath();
+    ctx.arc(64, 64, 50, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 60px Inter, Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(id.toString(), 64, 68);
+
+    dynamicTexture.update();
+
+    // Crear plano con el número
+    const numberPlane = BABYLON.MeshBuilder.CreatePlane("houseNumber" + id, { size: 2 }, scene);
+
+    // Posicionar arriba y al frente de la casa
+    const forward = new BABYLON.Vector3(Math.sin(rotation || 0), 0, Math.cos(rotation || 0));
+    numberPlane.position = new BABYLON.Vector3(
+        x + forward.x * 4,
+        6, // Altura visible
+        z + forward.z * 4
+    );
+    numberPlane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+    const numberMat = new BABYLON.StandardMaterial("numberMat" + id, scene);
+    numberMat.diffuseTexture = dynamicTexture;
+    numberMat.emissiveTexture = dynamicTexture;
+    numberMat.opacityTexture = dynamicTexture;
+    numberMat.useAlphaFromDiffuseTexture = true;
+    numberMat.disableLighting = true;
+    numberPlane.material = numberMat;
+
+    return numberPlane;
 }

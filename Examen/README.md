@@ -1,230 +1,286 @@
-# Cartero del Vecindario - Examen Babylon.js
+# Cartero del Vecindario
 
-Videojuego 3D desarrollado en Babylon.js para examen académico.
+**Vertical Slice - Prototipo Jugable | Examen Final**
 
-## Descripción del Juego
-
-Eres un cartero que debe recoger cartas en la oficina de correos y entregarlas en el buzón de la casa del vecindario. El juego implementa mecánicas de recogida, transporte (parenting) y entrega de objetos con controles de primera persona.
-
-## Características Implementadas
-
-### Mecánicas de Juego
-- **Sistema de movimiento**: Control WASD para mover al jugador en primera persona
-- **Sistema de cámara**: Vista en primera persona con control de mouse
-- **Recogida de objetos**: Presiona E cerca de la carta para recogerla (sistema de parenting)
-- **Transporte de objetos**: La carta se adjunta a la cámara mientras se transporta
-- **Entrega de objetos**: Presiona E cerca del buzón para entregar (parent = null)
-- **Sistema de estados**: Validación para no recoger si ya tiene carta, no entregar si no la tiene
-- **Proximidad**: Detección de distancia usando BABYLON.Vector3.Distance
-
-### Elementos del Mundo 3D
-- **Suelo**: Plano texturizado con asfalto
-- **Oficina de Correos**: Edificio con techo y letrero (zona de pickup)
-- **Casa con Buzón**: Casa con techo y buzón exterior (zona de delivery)
-- **Carta**: Objeto visible con animación de flotación
-- **Decoraciones**: Farolas con iluminación, árboles decorativos
-- **Iluminación**: Sistema de luz hemisférica, direccional y puntual
-
-### UI del Juego
-- Pantalla de título con instrucciones
-- Indicador de estado en tiempo real
-- Contador de entregas completadas
-- Prompts de interacción contextuales
-
-## Cómo Ejecutar el Juego
-
-### Opción 1: Servidor Local (Recomendado)
-
-1. **Descargar las texturas** en la carpeta `assets/`:
-   - `ground_asphalt.jpg` - Textura de asfalto para el suelo
-   - `wall_brick.jpg` - Textura de ladrillo para edificios
-   - `letter.png` - Textura de carta
-   - `mailbox.png` - Textura de buzón
-
-2. **Iniciar un servidor local**:
-
-   Con Python 3:
-   ```bash
-   cd Examen-01
-   python -m http.server 8000
-   ```
-
-   Con Python 2:
-   ```bash
-   cd Examen-01
-   python -m SimpleHTTPServer 8000
-   ```
-
-   Con Node.js (http-server):
-   ```bash
-   cd Examen-01
-   npx http-server -p 8000
-   ```
-
-   Con PHP:
-   ```bash
-   cd Examen-01
-   php -S localhost:8000
-   ```
-
-3. **Abrir el navegador** en `http://localhost:8000`
-
-### Opción 2: Extensión Live Server (VS Code)
-
-1. Instala la extensión "Live Server" en Visual Studio Code
-2. Abre la carpeta `Examen-01` en VS Code
-3. Clic derecho en `index.html` → "Open with Live Server"
-
-### Opción 3: Abrir directamente (no recomendado)
-
-Puedes abrir `index.html` directamente en el navegador, pero las texturas podrían no cargarse debido a políticas CORS. El juego funcionará con colores sólidos como fallback.
-
-## Controles del Juego
-
-| Tecla | Acción |
-|-------|--------|
-| **W** | Mover adelante |
-| **A** | Mover izquierda |
-| **S** | Mover atrás |
-| **D** | Mover derecha |
-| **Mouse** | Mirar alrededor |
-| **E** | Recoger carta / Entregar carta |
-
-## Flujo de Juego
-
-1. **Inicio**: Presiona "Comenzar Juego" en la pantalla de título
-2. **Búsqueda**: Ve hacia la oficina de correos (edificio marrón a la izquierda)
-3. **Recogida**: Acércate a la carta brillante y presiona **E** para recogerla
-4. **Transporte**: La carta se adjunta a tu vista (parenting activo)
-5. **Entrega**: Ve hacia la casa (edificio blanco a la derecha) y busca el buzón azul
-6. **Completar**: Acércate al buzón y presiona **E** para entregar
-7. **Repetir**: La carta reaparece en la oficina para entregas adicionales
-
-## Estructura de Archivos
-
-```
-Examen-01/
-├── index.html                 # HTML y UI del juego
-├── README.md                  # Este archivo
-├── js/                        # Módulos JavaScript (ES6)
-│   ├── config.js              # Variables globales y configuración
-│   ├── camera.js              # Sistema de cámara y controles
-│   ├── lights.js              # Sistema de iluminación
-│   ├── environment.js         # Suelo y oficina de correos
-│   ├── objects.js             # Carta y casas del vecindario
-│   ├── decorations.js         # Decoraciones y assets 3D
-│   ├── player.js              # Representación del jugador
-│   ├── interactions.js        # Sistema de proximidad y prompts
-│   ├── gameLogic.js           # Lógica de recogida y entrega
-│   ├── controls.js            # Manejo de teclado
-│   └── main.js                # Inicialización y loop principal
-└── assets/                    # Carpeta para assets
-    ├── ground_asphalt.jpg
-    ├── wall_brick.jpg
-    ├── letter.png
-    ├── mailbox.glb
-    └── kenney_nature-kit/     # Assets 3D decorativos
-        └── Models/GLTF format/
-            ├── tree_default.glb
-            ├── tree_cone.glb
-            ├── tree_blocks.glb
-            ├── flower_purpleA.glb
-            ├── flower_redA.glb
-            ├── flower_yellowA.glb
-            ├── rock_smallA.glb
-            └── rock_smallB.glb
-```
-
-## Requisitos Técnicos Implementados
-
-- **Engine**: Babylon.js 6.x (CDN)
-- **Arquitectura**: Módulos ES6 para organización de código
-- **Cámara**: FreeCamera (primera persona)
-- **Input**: scene.onKeyboardObservable para detección de teclas
-- **Proximidad**: BABYLON.Vector3.Distance para calcular distancias
-- **Parenting**: Sistema parent/child para adjuntar objetos
-- **Materiales**: StandardMaterial con texturas y colores
-- **Iluminación**: HemisphericLight, DirectionalLight, PointLight
-- **Assets 3D**: SceneLoader para modelos GLB/GLTF
-
-## Créditos de Assets
-
-Las texturas utilizadas son de licencia libre y pueden descargarse de:
-
-### Texturas de Suelo y Paredes
-- **Poly Haven** (https://polyhaven.com/)
-  - CC0 License - Dominio público
-  - Sugerencia: Buscar "asphalt" para el suelo
-
-- **AmbientCG** (https://ambientcg.com/)
-  - CC0 License - Dominio público
-  - Sugerencia: Buscar "brick" para las paredes
-
-### Sprites y Texturas 2D
-- **Kenney.nl** (https://kenney.nl/)
-  - CC0 License - Dominio público
-  - Sugerencia: Game Icons pack para carta y buzón
-
-### Alternativas Sugeridas
-- **OpenGameArt** (https://opengameart.org/)
-- **Textures.com** (versión gratuita limitada)
-- **FreePBR** (https://freepbr.com/)
-
-## Notas de Desarrollo
-
-- El código está **modularizado usando ES6 modules** para mejor organización
-- 11 módulos JavaScript separados por responsabilidad
-- Sistema de estados implementado para validación de acciones
-- Animaciones procedurales (flotación de carta, rotación)
-- UI responsiva con prompts contextuales
-- Fallback a colores sólidos si las texturas no se cargan
-- Optimizado para navegadores modernos (Chrome, Firefox, Edge)
-
-## Arquitectura del Código
-
-El juego utiliza una arquitectura modular con separación de responsabilidades:
-
-1. **config.js**: Gestión centralizada de variables globales
-2. **camera.js**: Configuración de cámara, colisiones y gravedad
-3. **lights.js**: Sistema de iluminación del mundo 3D
-4. **environment.js**: Creación del entorno (suelo, oficina)
-5. **objects.js**: Objetos interactuables (carta, casas)
-6. **decorations.js**: Elementos decorativos y assets 3D
-7. **player.js**: Representación del jugador
-8. **interactions.js**: Sistema de proximidad y prompts
-9. **gameLogic.js**: Mecánicas de recogida y entrega
-10. **controls.js**: Manejo de input del teclado
-11. **main.js**: Orquestación e inicialización
-
-## Solución de Problemas
-
-### Las texturas no se cargan
-- Asegúrate de usar un servidor local (no abrir el archivo directamente)
-- Verifica que los archivos de textura existen en la carpeta `assets/`
-- Revisa la consola del navegador (F12) para errores
-
-### El juego no responde
-- Haz clic en el canvas después de presionar "Comenzar Juego"
-- Verifica que estás usando un navegador compatible (Chrome/Firefox recomendados)
-
-### La carta no se puede recoger
-- Acércate más (distancia menor a 2 unidades)
-- Asegúrate de estar mirando hacia la carta
-- Presiona E (no mantengas presionado)
-
-## Autor
-
-Proyecto desarrollado para examen académico de programación de videojuegos 3D.
-
-## Tecnologías Utilizadas
-
-- **Babylon.js**: Motor de renderizado 3D
-- **HTML5 Canvas**: Superficie de renderizado
-- **JavaScript**: Lógica del juego
-- **CSS3**: Interfaz de usuario
+Un juego 3D en primera persona desarrollado con **Babylon.js** donde el jugador asume el rol de un cartero que debe recoger y entregar cartas en un vecindario suburbano.
 
 ---
 
-**Fecha de desarrollo**: Diciembre 2025
-**Versión**: 1.0
-**Licencia del código**: Académico - Uso educativo
+## Descripción del Juego
+
+Este proyecto es un **Vertical Slice** con **Enfoque en Mecánicas** que demuestra un ciclo de gameplay completo y pulido:
+
+- Sistema de recolección y entrega de objetos
+- Movimiento en primera persona (FPS)
+- **Brújula direccional** que apunta al destino
+- **Números 3D** visibles sobre cada casa
+- Feedback audiovisual completo (sonidos sintéticos + partículas)
+- UI/HUD minimalista con paleta cálida coherente
+
+### Objetivo del Juego
+1. **Recoge** la carta en la oficina postal (zona azul brillante)
+2. **Sigue la brújula** para encontrar la casa destino
+3. **Entrega** la carta en el buzón (zona verde)
+4. **Repite** para completar más entregas
+
+---
+
+## Cómo Ejecutar el Prototipo
+
+### Opción 1: Servidor Local (Recomendado)
+```bash
+# Navegar a la carpeta del proyecto
+cd Examen
+
+# Usar cualquier servidor HTTP local
+npx serve .
+# o
+python -m http.server 8000
+# o
+php -S localhost:8000
+```
+Luego abrir `http://localhost:8000` en el navegador.
+
+### Opción 2: Live Server (VS Code)
+1. Instalar la extensión "Live Server" en VS Code
+2. Abrir la carpeta `Examen/`
+3. Click derecho en `index.html` → "Open with Live Server"
+
+---
+
+## Controles
+
+| Tecla | Acción |
+|-------|--------|
+| **W/A/S/D** | Movimiento |
+| **Mouse** | Mirar alrededor |
+| **E** | Recoger / Entregar carta |
+| **ESC** | Liberar cursor |
+| **🔊** | Silenciar / Activar audio |
+
+---
+
+## Tecnologías Utilizadas
+
+- **Motor 3D**: [Babylon.js](https://www.babylonjs.com/) v8.31
+- **Lenguaje**: JavaScript ES6+ (Modules)
+- **Assets 3D**: [Kenney.nl](https://kenney.nl/) (City Kit, Nature Kit) - CC0 License
+- **Audio**: Web Audio API (síntesis de sonido procedural)
+- **Tipografía**: Google Fonts (Inter)
+- **Estilos**: CSS3 con variables CSS, animaciones y backdrop-filter
+
+---
+
+## Estructura del Proyecto
+
+```
+Examen/
+├── index.html          # Punto de entrada y UI/HUD minimalista
+├── README.md           # Este archivo
+│
+├── js/                 # Código JavaScript modular (14 archivos)
+│   ├── main.js         # Inicialización y loop principal
+│   ├── config.js       # Variables globales y estado del juego
+│   ├── camera.js       # Sistema de cámara FPS con colisiones
+│   ├── player.js       # Representación del jugador
+│   ├── controls.js     # Manejo de entrada (teclado)
+│   ├── interactions.js # Proximidad, crosshair interactivo, brújula
+│   ├── gameLogic.js    # Mecánicas principales (pickup/delivery)
+│   ├── lights.js       # Iluminación de escena
+│   ├── environment.js  # Terreno y oficina postal
+│   ├── objects.js      # Cartas, casas, buzones, números 3D
+│   ├── decorations.js  # Farolas, árboles, flores
+│   ├── audio.js        # Sistema de audio (Patrón Singleton)
+│   └── effects.js      # Partículas y efectos visuales
+│
+└── assets/             # Recursos 3D y texturas
+    ├── ground_asphalt.jpg
+    ├── letter.png
+    ├── mailbox_lp.glb
+    ├── kenney_city-kit-roads/
+    ├── kenney_city-kit-suburban_20/
+    └── kenney_nature-kit/
+```
+
+---
+
+## Características Técnicas Destacadas
+
+### 1. Sistema de Audio - Patrón Singleton (audio.js)
+
+Implementación de un **AudioManager** usando el patrón Singleton con Web Audio API:
+
+```javascript
+class AudioManager {
+    static instance = null;
+
+    constructor() {
+        if (AudioManager.instance) return AudioManager.instance;
+        this.ctx = new AudioContext();
+        AudioManager.instance = this;
+    }
+
+    playPickup()   // Tono ascendente tipo "coin collect"
+    playDelivery() // Acorde mayor de éxito (C-E-G)
+    playError()    // Tono de rechazo
+}
+```
+
+### 2. Sistema de Navegación - Brújula Direccional
+
+La brújula en el HUD apunta dinámicamente hacia la casa destino:
+
+```javascript
+export function updateCompass() {
+    // Calcula ángulo entre dirección de la cámara y objetivo
+    const angleToTarget = Math.atan2(directionToTarget.x, directionToTarget.z);
+    const cameraAngle = Math.atan2(cameraDirection.x, cameraDirection.z);
+    const relativeAngle = angleToTarget - cameraAngle;
+
+    // Rota la flecha CSS
+    compassArrow.style.transform = `rotate(${degrees}deg)`;
+}
+```
+
+### 3. Señalización Visual - Números 3D
+
+Cada casa tiene un número 3D visible usando DynamicTexture:
+
+```javascript
+function createHouseNumber(scene, id, x, z) {
+    const dynamicTexture = new BABYLON.DynamicTexture(...);
+    ctx.fillText(id.toString(), 64, 68); // Dibuja número
+
+    const numberPlane = BABYLON.MeshBuilder.CreatePlane(...);
+    numberPlane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+}
+```
+
+### 4. Crosshair Interactivo
+
+El crosshair cambia de apariencia cuando está sobre un objeto interactivo:
+
+```javascript
+export function setCrosshairInteractive(isInteractive) {
+    if (isInteractive) {
+        crosshair.classList.add('interactive'); // Punto → Anillo naranja
+    }
+}
+```
+
+### 5. Paleta de Colores Coherente
+
+Variables CSS para consistencia visual:
+
+```css
+:root {
+    --color-primary: #E85D04;    /* Naranja cálido */
+    --color-secondary: #F48C06;  /* Naranja claro */
+    --color-accent: #FAA307;     /* Amarillo dorado */
+    --color-success: #52B788;    /* Verde suave */
+    --color-text: #FEFAE0;       /* Texto crema */
+}
+```
+
+---
+
+## Mejoras Implementadas (Según Feedback)
+
+| Área | Mejora |
+|------|--------|
+| **UI/UX** | Paleta cálida coherente, HUD minimalista, tipografía legible (Inter) |
+| **Navegación** | Brújula direccional que apunta al destino |
+| **Señalización** | Números 3D flotantes sobre cada casa |
+| **Crosshair** | Cambia de color al estar sobre objetos interactivos |
+| **Transiciones** | Fade in al iniciar, prompts con animación suave |
+| **Feedback** | Partículas y flash de pantalla con colores coherentes |
+
+---
+
+## Marco MDA (Mechanics, Dynamics, Aesthetics)
+
+### Mecánicas
+- Movimiento en primera persona (WASD + mouse)
+- Interacción por proximidad (tecla E)
+- Brújula direccional hacia objetivo
+- Sistema de contador de entregas
+
+### Dinámicas
+- Navegación orientada por brújula
+- Identificación visual de casas por números
+- Ciclo: **pickup → navigate → deliver → repeat**
+- Feedback inmediato en cada acción
+
+### Estéticas
+- **Satisfacción**: Feedback audiovisual gratificante (confetti, sonidos)
+- **Orientación**: Brújula y números eliminan frustración de búsqueda
+- **Inmersión**: Paleta cálida crea ambiente de vecindario acogedor
+- **Logro**: Contador visible motiva a continuar
+
+### Reflexión Crítica
+> "La mecánica de recoger y entregar, combinada con la brújula direccional, elimina la frustración de la búsqueda aleatoria y permite al jugador enfocarse en la satisfacción de completar entregas. El feedback audiovisual inmediato (partículas naranjas, sonidos de éxito) refuerza la sensación de logro y crea un ciclo de juego gratificante."
+
+---
+
+## Diagrama de Arquitectura
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        main.js                              │
+│              (Inicialización y Loop Principal)              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐   ┌─────────────────┐   ┌─────────────────┐
+│   config.js   │   │  interactions.js │   │   gameLogic.js  │
+│ (Estado Global│   │ (Proximidad,     │   │ (Pickup/Deliver)│
+│  Singleton)   │   │  Brújula)        │   │                 │
+└───────────────┘   └─────────────────┘   └─────────────────┘
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌───────────────┐   ┌─────────────────┐   ┌─────────────────┐
+│   audio.js    │   │   effects.js    │   │   objects.js    │
+│  (Singleton   │   │  (Partículas,   │   │ (Casas, Cartas, │
+│   Web Audio)  │   │   Flash, Shake) │   │  Números 3D)    │
+└───────────────┘   └─────────────────┘   └─────────────────┘
+```
+
+---
+
+## Solución de Problemas
+
+### El audio no funciona
+- El audio requiere interacción del usuario (click en "Jugar")
+- Verifica que el navegador no esté bloqueando Web Audio API
+
+### La brújula no se mueve
+- Asegúrate de que el juego ha iniciado (click en "Jugar")
+- La brújula apunta hacia el buzón de la casa destino
+
+### Los números de las casas no se ven
+- Acércate un poco; los números están a 6 unidades de altura
+- Verifica que los modelos se cargaron (ver consola)
+
+---
+
+## Créditos
+
+- **Motor 3D**: Babylon.js por Babylon.js Team
+- **Assets 3D**: Kenney (kenney.nl) - CC0 License
+- **Tipografía**: Inter por Rasmus Andersson
+- **Desarrollo**: [Tu Nombre]
+- **Curso**: Software para Videojuegos - EPN
+
+---
+
+## Información del Proyecto
+
+- **Tipo**: Vertical Slice - Examen Final
+- **Enfoque**: Mecánicas de gameplay
+- **Versión**: 3.0 (con mejoras de feedback)
+- **Fecha**: Enero 2026
+
+---
+
+*Este proyecto demuestra un ciclo de gameplay pulido con navegación intuitiva, feedback audiovisual coherente, y arquitectura modular siguiendo patrones de diseño de software.*
